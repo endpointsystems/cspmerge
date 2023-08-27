@@ -5,6 +5,23 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
+        <Product>cspmerge command line tool</Product>
+        <Title>CSPMerge - Sync NuGet PackageReference versions</Title>
+        <Authors>endpointsystems</Authors>
+        <Description>Evaluate, update and synchronize NuGet PackageReference versions across two csproj files</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/endpointsystems/cspmerge</PackageProjectUrl>
+        <PackageTags>.NET Tool,csproj,PackageReference,NuGet,CLI</PackageTags>
+        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <PackageType>DotnetCliTool</PackageType>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>cspmerge</ToolCommandName>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RepositoryType>GitHub</RepositoryType>
+        <RepositoryBranch>master</RepositoryBranch>
+        <Copyright>2007-2023 Endpoint Systems. All rights reserved.</Copyright>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,5 +34,12 @@
       <PackageReference Include="Spectre.Console" Version="0.47.0" />
     </ItemGroup>
 
-
+    <ItemGroup>
+        <None Update="icon.png">
+            <Pack>true</Pack>
+            <Visible>false</Visible>
+            <PackagePath>/</PackagePath>
+        </None>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 </Project>
