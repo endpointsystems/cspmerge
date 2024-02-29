@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <Product>cspmerge command line tool</Product>
@@ -12,34 +11,32 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/endpointsystems/cspmerge</PackageProjectUrl>
         <PackageTags>.NET Tool,csproj,PackageReference,NuGet,CLI</PackageTags>
-        <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+        <PackageReleaseNotes>Upgrade to .net 8, fix issue with versioning around revision numbers</PackageReleaseNotes>
         <PackageType>DotnetCliTool</PackageType>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>cspmerge</ToolCommandName>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RepositoryType>GitHub</RepositoryType>
         <RepositoryBranch>master</RepositoryBranch>
-        <Copyright>2007-2023 Endpoint Systems. All rights reserved.</Copyright>
+        <Copyright>2007-2024 Endpoint Systems. All rights reserved.</Copyright>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageVersion>8.0.1</PackageVersion>
+        <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.1.0" />
-      <PackageReference Include="McMaster.Extensions.Hosting.CommandLine" Version="4.1.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+      <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="4.1.1" />
+      <PackageReference Include="McMaster.Extensions.Hosting.CommandLine" Version="4.1.1" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
       <PackageReference Include="Semver" Version="2.3.0" />
-      <PackageReference Include="Spectre.Console" Version="0.47.0" />
+      <PackageReference Include="Spectre.Console" Version="0.48.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="icon.png">
-            <Pack>true</Pack>
-            <Visible>false</Visible>
-            <PackagePath>/</PackagePath>
-        </None>
+        <None Include=".\icon.png" Pack="true" PackagePath="\" />
         <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 </Project>

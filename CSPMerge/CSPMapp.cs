@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using CSPMerge.Commands;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -8,5 +7,8 @@ namespace CSPMerge;
 [Subcommand(typeof(List), typeof(Compare), typeof(Update))]
 public class CSPMApp
 {
-    public void OnExecute(){}
+    public void OnExecute(CommandLineApplication app)
+    {
+        app.ShowHelp();
+    }
 }

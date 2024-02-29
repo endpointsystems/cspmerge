@@ -1,6 +1,6 @@
-using System.Net;
 using System.Xml.Linq;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Logging;
 using Semver;
 using Spectre.Console;
 
@@ -15,21 +15,26 @@ public class Compare: BaseCommand
     [Option(ShortName = "d", LongName = "destination", Description = "the second csproj file")]
     public string Destination { get; set; }
 
-    public Task OnExecute()
+    public Task OnExecute(IConsole console)
     {
-        ArgumentNullException.ThrowIfNull(Source);
-        ArgumentNullException.ThrowIfNull(Destination);
+        if (string.IsNullOrEmpty(Source) || string.IsNullOrEmpty(Destination))
+        {
+            console.WriteLine("source or destination missing - make sure to use -s and -d parameters");
+
+            return Task.CompletedTask;
+
+        }
 
         var root1 = XElement.Load(Source);
         var root2 = XElement.Load(Destination);
-            
+
         var fp = getPackageRefs(root1);
         var sp = getPackageRefs(root2);
 
         var fp2 = new List<XElement>(fp);
         var sp2 = new List<XElement>(sp);
 
-        
+
         var table = new Table();
         table.AddColumn("Name", config =>
         {
@@ -54,9 +59,39 @@ public class Compare: BaseCommand
             if (s == null) continue;
             var lhs = f.Attribute("Version")!.Value;
             var rhs = s.Attribute("Version")!.Value;
-            var s1 = SemVersion.FromVersion(new Version(lhs));
-            var s2 = SemVersion.FromVersion(new Version(rhs));
-            var c = compareVersions(s1, s2);
+
+            if (lhs.Contains(".*"))
+            {
+                AnsiConsole.WriteLine($"skipping {f.Attribute("Include")!.Value} as it contains a wildcard");
+                continue;
+            }
+
+            if (rhs.Contains(".*"))
+            {
+                AnsiConsole.WriteLine($"skipping {s.Attribute("Include")!.Value} as it contains a wildcard");
+                continue;
+            }
+
+            string c = string.Empty;
+            var parsed = SemVersion.TryParse(lhs, SemVersionStyles.Any, out SemVersion parsedLhs);
+            var parsed2 = SemVersion.TryParse(rhs, SemVersionStyles.Any, out SemVersion parsedRhs);
+
+            if (SemVersion.TryParse(lhs, SemVersionStyles.Any, out SemVersion s1) &&
+                SemVersion.TryParse(rhs, SemVersionStyles.Any, out SemVersion s2))
+            {
+                AnsiConsole.WriteLine($"parsed Semver: {parsed} for {lhs}, {parsed2} for {rhs}");
+                c = compareVersions(s1, s2);
+            }
+            else
+            {
+                var v1 = Version.Parse(lhs);
+                var v2 = Version.Parse(rhs);
+                c = compareVersions(v1, v2);
+            }
+
+            // var s1 = SemVersion.FromVersion(new Version(lhs));
+            // var s2 = SemVersion.FromVersion(new Version(rhs));
+            // var c = compareVersions(s1, s2);
 
             table.AddRow(f.Attribute("Include")!.Value,f.Attribute("Version")!.Value, c, s.Attribute("Version")!.Value);
             sp2.RemoveAt(sp2.IndexOf(s));

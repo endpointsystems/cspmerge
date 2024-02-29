@@ -15,6 +15,7 @@ var services = new ServiceCollection()
 
 var p = services.BuildServiceProvider();
 var app = new CommandLineApplication<CSPMApp>();
+app.HelpOption(inherited: true);
 app.Conventions
     .UseDefaultConventions()
     .UseConstructorInjection(p);

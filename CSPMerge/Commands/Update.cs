@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
 
@@ -14,28 +13,45 @@ public class Update: BaseCommand
     [Option(ShortName = "d", LongName = "destination", Description = "The destination csproj")]
     public string Destination { get; set; }
 
-    [Option(LongName = "sync",ShortName = "c", Description = "if set, syncs versions in both files")]
+    [Option(LongName = "sync",ShortName = "c", Description = "if set, syncs versions from source to destination")]
     public bool Sync { get; set; }
 
-    public Task OnExecute()
+    public Task OnExecute(IConsole console)
     {
         AnsiConsole.WriteLine($"sync is {Sync}");
-        ArgumentNullException.ThrowIfNull(Source);
-        ArgumentNullException.ThrowIfNull(Destination);
+        if (string.IsNullOrEmpty(Source) || string.IsNullOrEmpty(Destination))
+        {
+            console.WriteLine("source or destination parameters missing - make sure to use the -s and -d options");
+            return Task.CompletedTask;
+        }
 
         var src = XElement.Load(Source);
         var dest = XElement.Load(Destination);
 
         var sf = Path.GetFileNameWithoutExtension(Source);
         var df = Path.GetFileNameWithoutExtension(Destination);
-        
+
         var selem = getPackageRefs(src);
         var delem = getPackageRefs(dest);
 
         foreach (var s in selem)
         {
             var d = delem.FirstOrDefault(x => x.Attribute("Include")!.Value == s.Attribute("Include")!.Value);
-            if (d == null) continue;
+            if (d == null)
+            {
+                if (!Sync)
+                {
+                    console.WriteLine(
+                        $"{s.Attribute("Include")!.Value} does not exist, sync is disabled, skipping");
+                    continue;
+                }
+                else
+                {
+                    console.WriteLine($"adding missing package {s.Attribute("Include")!.Value} to destination");
+                    delem.Add(s);
+                    continue;
+                }
+            }
 
             var c = compareVersions(s, d);
             var inc = s.Attribute("Include")!.Value;
@@ -62,15 +78,15 @@ public class Update: BaseCommand
             {
                 AnsiConsole.WriteLine($"{inc} have equal versions");
             }
-            
         }
-        
+
         AnsiConsole.WriteLine("saving source..");
         src.Save(Source,SaveOptions.None);
         AnsiConsole.WriteLine("saving destination..");
         dest.Save(Destination, SaveOptions.None);
+        AnsiConsole.WriteLine($"Completed at {DateTime.Now:t}");
         return Task.CompletedTask;
-        
+
     }
 }
 
@@ -78,5 +94,6 @@ public enum Comparison
 {
     LessThan,
     GreaterThan,
-    Equal
+    Equal,
+    NotExist
 }
