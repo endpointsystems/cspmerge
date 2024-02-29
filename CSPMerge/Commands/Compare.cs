@@ -79,7 +79,6 @@ public class Compare: BaseCommand
             if (SemVersion.TryParse(lhs, SemVersionStyles.Any, out SemVersion s1) &&
                 SemVersion.TryParse(rhs, SemVersionStyles.Any, out SemVersion s2))
             {
-                AnsiConsole.WriteLine($"parsed Semver: {parsed} for {lhs}, {parsed2} for {rhs}");
                 c = compareVersions(s1, s2);
             }
             else
