@@ -21,7 +21,7 @@
         <Copyright>2007-2024 Endpoint Systems. All rights reserved.</Copyright>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageVersion>8.0.1</PackageVersion>
+        <PackageVersion>8.0.2</PackageVersion>
         <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
