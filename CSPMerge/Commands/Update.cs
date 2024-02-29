@@ -48,7 +48,12 @@ public class Update: BaseCommand
                 else
                 {
                     console.WriteLine($"adding missing package {s.Attribute("Include")!.Value} to destination");
-                    delem.Add(s);
+                    var pref = (from x in dest.Descendants()
+                        where x.Name == "PackageReference"
+                        select x).First().Parent;
+
+                    pref!.Add(s);
+                    //delem.Add(s);
                     continue;
                 }
             }
@@ -58,7 +63,8 @@ public class Update: BaseCommand
             if (c == Comparison.LessThan && Sync)
             {
                 AnsiConsole.WriteLine($"syncing {inc} version in {sf} to {d.Attribute("Version")!.Value}");
-                s.Attribute("Version")!.Value = d.Attribute("Version")!.Value;
+                s.Attribute("Version")!.SetValue(d.Attribute("Version")!.Value);
+                //s.Attribute("Version")!.Value = d.Attribute("Version")!.Value;
                 continue;
             }
 
