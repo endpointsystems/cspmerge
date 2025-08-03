@@ -1,6 +1,7 @@
 ﻿using System.Xml.Linq;
 using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace CSPMerge.Commands;
 
@@ -16,6 +17,7 @@ public class Update: BaseCommand
     [Option(LongName = "sync",ShortName = "c", Description = "if set, syncs versions from source to destination")]
     public bool Sync { get; set; }
 
+    // ReSharper disable once CognitiveComplexity
     public Task OnExecute(IConsole console)
     {
         AnsiConsole.WriteLine($"sync is {Sync}");
@@ -45,17 +47,15 @@ public class Update: BaseCommand
                         $"{s.Attribute("Include")!.Value} does not exist, sync is disabled, skipping");
                     continue;
                 }
-                else
-                {
-                    console.WriteLine($"adding missing package {s.Attribute("Include")!.Value} to destination");
-                    var pref = (from x in dest.Descendants()
-                        where x.Name == "PackageReference"
-                        select x).First().Parent;
 
-                    pref!.Add(s);
-                    //delem.Add(s);
-                    continue;
-                }
+                console.WriteLine($"adding missing package {s.Attribute("Include")!.Value} to destination");
+                var pref = (from x in dest.Descendants()
+                    where x.Name == "PackageReference"
+                    select x).First().Parent;
+
+                pref!.Add(s);
+                //delem.Add(s);
+                continue;
             }
 
             var c = compareVersions(s, d);

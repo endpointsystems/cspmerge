@@ -57,22 +57,24 @@ public abstract class BaseCommand
     {
         var x1 = e1.Attribute("Version")!.Value;
         var x2 = e2.Attribute("Version")!.Value;
+
+        if (x1.Contains("["))
+            return Comparison.LessThan;
+
         if (x1.Contains(".*") || x2.Contains(".*"))
         {
             var sm1 = SemVersionRange.Parse(x1,SemVersionRangeOptions.Loose);
             var sm2 = SemVersionRange.Parse(x2, SemVersionRangeOptions.Loose);
             return compare(sm1, sm2);
         }
-        else
-        {
-            if (SemVersion.TryParse(x1, SemVersionStyles.Any, out SemVersion s1) &&
-                SemVersion.TryParse(x2, SemVersionStyles.Any, out SemVersion s2))
-                return compare(s1, s2);
 
-            var v1 = Version.Parse(x1);
-            var v2 = Version.Parse(x2);
-            return compare(v1, v2);
-        }
+        if (SemVersion.TryParse(x1, SemVersionStyles.Any, out SemVersion s1) &&
+            SemVersion.TryParse(x2, SemVersionStyles.Any, out SemVersion s2))
+            return compare(s1, s2);
+
+        var v1 = Version.Parse(x1);
+        var v2 = Version.Parse(x2);
+        return compare(v1, v2);
     }
 
     protected List<XElement> getPackageRefs(XElement root)

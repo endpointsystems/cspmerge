@@ -11,7 +11,7 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/endpointsystems/cspmerge</PackageProjectUrl>
         <PackageTags>.NET Tool,csproj,PackageReference,NuGet,CLI</PackageTags>
-        <PackageReleaseNotes>fix bug in adding missing packages</PackageReleaseNotes>
+        <PackageReleaseNotes>add logic for handling 'boxed-in' NuGet versions</PackageReleaseNotes>
         <PackageType>DotnetCliTool</PackageType>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>cspmerge</ToolCommandName>
@@ -21,8 +21,8 @@
         <Copyright>2007-2024 Endpoint Systems. All rights reserved.</Copyright>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageVersion>8.0.2</PackageVersion>
-        <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+        <PackageVersion>8.0.3</PackageVersion>
+        <TargetFrameworks>net6.0;net8.0;net9.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
