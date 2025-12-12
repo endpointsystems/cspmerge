@@ -5,7 +5,7 @@ using Spectre.Console;
 namespace CSPMerge.Commands;
 
 [Command(Name = "list", Description = "list the PackageRefs for a given csproj")]
-public class List
+public class List: BaseCommand
 {
     [Option(ShortName = "s", LongName = "source", Description = "the path and file name of the csproj file")]
     public string Source { get; set; }
@@ -34,8 +34,14 @@ public class List
         });
         foreach (var element in prefs)
         {
-            //Console.WriteLine(element.Attribute("Include").Value);
-            table.AddRow(element!.Attribute("Include")!.Value, element.Attribute("Version")!.Value);
+            if (ValidatePackageReference(element, out string error))
+            {
+                table.AddRow(GetAttributeValue(element, "Include"), GetAttributeValue(element, "Version"));
+            }
+            else
+            {
+                AnsiConsole.WriteLine($"Skipping invalid package reference: {error}");
+            }
         }
 
         AnsiConsole.Write(table);

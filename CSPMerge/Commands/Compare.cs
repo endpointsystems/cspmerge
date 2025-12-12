@@ -55,20 +55,34 @@ public class Compare: BaseCommand
 
         foreach (var f in fp)
         {
-            var s = sp.FirstOrDefault(x => x.Attribute("Include")!.Value == f.Attribute("Include")!.Value);
+            if (!ValidatePackageReference(f, out string fError))
+            {
+                AnsiConsole.WriteLine($"Skipping invalid package reference: {fError}");
+                continue;
+            }
+
+            var fInclude = GetAttributeValue(f, "Include");
+            var s = sp.FirstOrDefault(x => x.Attribute("Include")?.Value == fInclude);
             if (s == null) continue;
-            var lhs = f.Attribute("Version")!.Value;
-            var rhs = s.Attribute("Version")!.Value;
+
+            if (!ValidatePackageReference(s, out string sError))
+            {
+                AnsiConsole.WriteLine($"Skipping invalid package reference: {sError}");
+                continue;
+            }
+
+            var lhs = GetAttributeValue(f, "Version");
+            var rhs = GetAttributeValue(s, "Version");
 
             if (lhs.Contains(".*"))
             {
-                AnsiConsole.WriteLine($"skipping {f.Attribute("Include")!.Value} as it contains a wildcard");
+                AnsiConsole.WriteLine($"skipping {fInclude} as it contains a wildcard");
                 continue;
             }
 
             if (rhs.Contains(".*"))
             {
-                AnsiConsole.WriteLine($"skipping {s.Attribute("Include")!.Value} as it contains a wildcard");
+                AnsiConsole.WriteLine($"skipping {fInclude} as it contains a wildcard");
                 continue;
             }
 
@@ -92,19 +106,25 @@ public class Compare: BaseCommand
             // var s2 = SemVersion.FromVersion(new Version(rhs));
             // var c = compareVersions(s1, s2);
 
-            table.AddRow(f.Attribute("Include")!.Value,f.Attribute("Version")!.Value, c, s.Attribute("Version")!.Value);
+            table.AddRow(fInclude, lhs, c, rhs);
             sp2.RemoveAt(sp2.IndexOf(s));
             fp2.RemoveAt(fp2.IndexOf(f));
         }
 
         foreach (var f in fp2)
         {
-            table.AddRow(f.Attribute("Include")!.Value, f.Attribute("Version")!.Value);
+            if (ValidatePackageReference(f, out _))
+            {
+                table.AddRow(GetAttributeValue(f, "Include"), GetAttributeValue(f, "Version"));
+            }
         }
 
         foreach (var s in sp2)
         {
-            table.AddRow(s.Attribute("Include")!.Value, String.Empty, String.Empty, s.Attribute("Version")!.Value);
+            if (ValidatePackageReference(s, out _))
+            {
+                table.AddRow(GetAttributeValue(s, "Include"), String.Empty, String.Empty, GetAttributeValue(s, "Version"));
+            }
         }
 
         AnsiConsole.Write(table);

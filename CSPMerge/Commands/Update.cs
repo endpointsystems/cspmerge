@@ -38,51 +38,74 @@ public class Update: BaseCommand
 
         foreach (var s in selem)
         {
-            var d = delem.FirstOrDefault(x => x.Attribute("Include")!.Value == s.Attribute("Include")!.Value);
+            if (!ValidatePackageReference(s, out string sError))
+            {
+                console.WriteLine($"Skipping invalid package reference in source: {sError}");
+                continue;
+            }
+
+            var sInclude = GetAttributeValue(s, "Include");
+            var d = delem.FirstOrDefault(x => x.Attribute("Include")?.Value == sInclude);
             if (d == null)
             {
                 if (!Sync)
                 {
                     console.WriteLine(
-                        $"{s.Attribute("Include")!.Value} does not exist, sync is disabled, skipping");
+                        $"{sInclude} does not exist, sync is disabled, skipping");
                     continue;
                 }
 
-                console.WriteLine($"adding missing package {s.Attribute("Include")!.Value} to destination");
-                var pref = (from x in dest.Descendants()
+                console.WriteLine($"adding missing package {sInclude} to destination");
+                var existingPackageRef = (from x in dest.Descendants()
                     where x.Name == "PackageReference"
-                    select x).First().Parent;
+                    select x).FirstOrDefault();
 
-                pref!.Add(s);
-                //delem.Add(s);
+                if (existingPackageRef?.Parent != null)
+                {
+                    existingPackageRef.Parent.Add(s);
+                }
+                else
+                {
+                    // No existing PackageReference found, create an ItemGroup
+                    var itemGroup = new XElement("ItemGroup");
+                    itemGroup.Add(s);
+                    dest.Add(itemGroup);
+                }
+                continue;
+            }
+
+            if (!ValidatePackageReference(d, out string dError))
+            {
+                console.WriteLine($"Skipping invalid package reference in destination: {dError}");
                 continue;
             }
 
             var c = compareVersions(s, d);
-            var inc = s.Attribute("Include")!.Value;
+            var sVersion = GetAttributeValue(s, "Version");
+            var dVersion = GetAttributeValue(d, "Version");
+
             if (c == Comparison.LessThan && Sync)
             {
-                AnsiConsole.WriteLine($"syncing {inc} version in {sf} to {d.Attribute("Version")!.Value}");
-                s.Attribute("Version")!.SetValue(d.Attribute("Version")!.Value);
-                //s.Attribute("Version")!.Value = d.Attribute("Version")!.Value;
+                AnsiConsole.WriteLine($"syncing {sInclude} version in {sf} to {dVersion}");
+                s.Attribute("Version")!.SetValue(dVersion);
                 continue;
             }
 
             if (c == Comparison.LessThan)
             {
-                AnsiConsole.WriteLine($"{inc} source {sf} {s.Attribute("Version")!.Value} is less than destination version {d.Attribute("Version")!.Value}, skipping");
+                AnsiConsole.WriteLine($"{sInclude} source {sf} {sVersion} is less than destination version {dVersion}, skipping");
                 continue;
             }
 
             if (c == Comparison.GreaterThan)
             {
-                AnsiConsole.WriteLine($"updating {inc} in {df} from {d.Attribute("Version")!.Value} to {s.Attribute("Version")!.Value}");
-                d.Attribute("Version")!.Value = s.Attribute("Version")!.Value;
+                AnsiConsole.WriteLine($"updating {sInclude} in {df} from {dVersion} to {sVersion}");
+                d.Attribute("Version")!.Value = sVersion;
             }
 
             if (c == Comparison.Equal)
             {
-                AnsiConsole.WriteLine($"{inc} have equal versions");
+                AnsiConsole.WriteLine($"{sInclude} have equal versions");
             }
         }
 
