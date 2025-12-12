@@ -55,11 +55,16 @@ public abstract class BaseCommand
 
     protected Comparison compareVersions(XElement e1, XElement e2)
     {
-        var x1 = e1.Attribute("Version")!.Value;
-        var x2 = e2.Attribute("Version")!.Value;
+        var x1 = GetAttributeValue(e1, "Version");
+        var x2 = GetAttributeValue(e2, "Version");
 
+        // Boxed versions (e.g., [14.0.0]) should always be treated as "less than"
+        // to ensure they get copied/overwritten during merge
         if (x1.Contains("["))
             return Comparison.LessThan;
+
+        if (x2.Contains("["))
+            return Comparison.GreaterThan;
 
         if (x1.Contains(".*") || x2.Contains(".*"))
         {
@@ -87,6 +92,35 @@ public abstract class BaseCommand
             select x;
 
         return prefs.ToList();
+    }
+
+    protected bool ValidatePackageReference(XElement element, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        if (element.Attribute("Include") == null)
+        {
+            errorMessage = "PackageReference missing 'Include' attribute";
+            return false;
+        }
+
+        if (element.Attribute("Version") == null)
+        {
+            errorMessage = $"PackageReference '{element.Attribute("Include")?.Value}' missing 'Version' attribute";
+            return false;
+        }
+
+        return true;
+    }
+
+    protected string GetAttributeValue(XElement element, string attributeName)
+    {
+        var attr = element.Attribute(attributeName);
+        if (attr == null)
+        {
+            throw new InvalidOperationException($"Element is missing required attribute '{attributeName}'");
+        }
+        return attr.Value;
     }
 
 
